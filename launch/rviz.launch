@@ -1,0 +1,5 @@
+<launch>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jet_turtle)/rviz/visual.rviz"
+        required="true" />
+</launch>
+  
