@@ -30,6 +30,7 @@
   <!-- build depends -->
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>rosserial</depend>
   <build_depend>message_generation</build_depend>
   <build_export_depend>message_generation</build_export_depend>
   <buildtool_depend>catkin</buildtool_depend>

@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="rosserial_python" type="serial_node.py" name="motor_controller">
+        <param name="port" value="/dev/ttyUSB0" />
+    </node>
+
+    <node pkg="jet_turtle" type="twist_ctrl.py" name="twist_ctrl">
+    </node>
+</launch>
