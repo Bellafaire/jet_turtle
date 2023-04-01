@@ -1,11 +1,21 @@
 <launch>
+    <node pkg="rosserial_python" type="serial_node.py" name="motor_controller">
+        <param name="port" value="/dev/ttyUSB0" />
+    </node>
+
+    <node pkg="jet_turtle" type="twist_ctrl.py" name="twist_ctrl">
+    </node>
+
     <!-- <arg name="serial_no_camera1" default="" /> -->
     <arg name="camera1" default="realsense_camera" />
     <arg name="tf_prefix_camera1" default="$(arg camera1)" />
-    <arg name="initial_reset" default="true" />
+    <arg name="initial_reset" default="false" />
     <arg name="reconnect_timeout" default="6.0" />
 
+    <remap from="/realsense_camera/depth/color/points" to="/cloud_in" />
+
     <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml" ns="$(arg camera1)">
+                
         <!-- <arg name="serial_no" value="$(arg serial_no_camera1)" /> -->
         <arg name="tf_prefix" value="$(arg tf_prefix_camera1)" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
@@ -18,21 +28,31 @@
         <arg name="pointcloud_texture_stream" default="RS2_STREAM_COLOR" />
 
         <arg name="color_width" default="480" />
-        <arg name="color_height" default="270"/>
+        <arg name="color_height" default="270" />
         <arg name="enable_color" default="true" />
         <arg name="color_fps" default="10" />
 
         <arg name="filters" default="pointcloud" />
     </include>
 
-
     <!-- Camera Transform -->
-    <node pkg="tf2_ros" type="static_transform_publisher" name="realsense_transform" args="0 0 0 0 0 0 1 base_link $(arg tf_prefix_camera1)_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="realsense_transform"
+        args="0.17 0 0.10 0 -0.06 0 base_link realsense_camera_link" />
 
-    <!-- Loads the camera model -->
-    <param name="robot_description"
-        command="$(find xacro)/xacro --inorder '$(find realsense2_description)/urdf/test_d435_camera.urdf.xacro' use_nominal_extrinsics:=false" />
+        <node pkg="tf2_ros" type="static_transform_publisher" name="absolute_trash"
+        args="0 0 0 0 0 0 odom base_link" />
 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <!-- SLAM  -->
+    <!-- <group ns="slam"> -->
+
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node"
+        name="pointcloud_to_laser">
+        <param name="target_frame" value="realsense_camera_link" />
+    </node>
+
+    <node pkg="hector_mapping" type="hector_mapping" name="slam_hector" >
+    </node>
+
+    <!-- </group> -->
+
 </launch>
-  

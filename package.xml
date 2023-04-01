@@ -38,6 +38,8 @@
   <!-- exec depends -->
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
+  <exec_depend>gmapping</exec_depend>
 
   <!-- other depends -->
   <buildtool_depend>catkin</buildtool_depend>
