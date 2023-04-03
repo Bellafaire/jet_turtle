@@ -1,6 +1,6 @@
 <launch>
     <node pkg="rosserial_python" type="serial_node.py" name="motor_controller">
-        <param name="port" value="/dev/ttyUSB0" />
+        <param name="port" value="/dev/ttyUSB1" />
     </node>
 
     <node pkg="jet_turtle" type="twist_ctrl.py" name="twist_ctrl">
@@ -12,10 +12,10 @@
     <arg name="initial_reset" default="false" />
     <arg name="reconnect_timeout" default="6.0" />
 
-    <remap from="/realsense_camera/depth/color/points" to="/cloud_in" />
+    <!-- <remap from="/realsense_camera/depth/color/points" to="/cloud_in" /> -->
 
     <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml" ns="$(arg camera1)">
-                
+
         <!-- <arg name="serial_no" value="$(arg serial_no_camera1)" /> -->
         <arg name="tf_prefix" value="$(arg tf_prefix_camera1)" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
@@ -24,13 +24,15 @@
         <arg name="depth_width" default="480" />
         <arg name="depth_height" default="270" />
         <arg name="enable_depth" default="true" />
-        <arg name="depth_fps" default="6" />
+        <arg name="depth_fps" default="15" />
         <arg name="pointcloud_texture_stream" default="RS2_STREAM_COLOR" />
+        <!--<arg
+        name="pointcloud_texture_stream" default="RS2_STREAM_ANY" />-->
 
         <arg name="color_width" default="480" />
         <arg name="color_height" default="270" />
         <arg name="enable_color" default="true" />
-        <arg name="color_fps" default="10" />
+        <arg name="color_fps" default="15" />
 
         <arg name="filters" default="pointcloud" />
     </include>
@@ -39,19 +41,31 @@
     <node pkg="tf2_ros" type="static_transform_publisher" name="realsense_transform"
         args="0.17 0 0.10 0 -0.06 0 base_link realsense_camera_link" />
 
-        <node pkg="tf2_ros" type="static_transform_publisher" name="absolute_trash"
+    <node pkg="tf2_ros" type="static_transform_publisher" name="absolute_trash"
         args="0 0 0 0 0 0 odom base_link" />
 
     <!-- SLAM  -->
     <!-- <group ns="slam"> -->
 
-    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node"
-        name="pointcloud_to_laser">
-        <param name="target_frame" value="realsense_camera_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="rplidar_transform"
+        args="0.17 0 0.18 3.14159 0 0 base_link scan" />
+
+    <node name="rplidarNode" pkg="rplidar_ros" type="rplidarNode" output="screen">
+        <param name="serial_port" type="string" value="/dev/ttyUSB0" />
+        <param name="serial_baudrate" type="int" value="115200" /><!--A1/A2 -->
+        <param name="frame_id" type="string" value="scan" />
+        <param name="inverted" type="bool" value="false" />
+        <param name="angle_compensate" type="bool" value="true" />
     </node>
 
-    <node pkg="hector_mapping" type="hector_mapping" name="slam_hector" >
+
+    <node pkg="hector_mapping" type="hector_mapping" name="slam_hector">
+        <param name="map_update_angle_thresh" value="0.1" />
+        <param name="map_update_distance_thresh" value="0.1" />
     </node>
+
+    <node pkg="jet_turtle" type="cloud_reducer" name="cloud_reducer" />
+
 
     <!-- </group> -->
 
